@@ -23,7 +23,10 @@ class AGASShooterCharacter : public ACharacter
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
-	USkeletalMeshComponent* Mesh1P;
+	USkeletalMeshComponent* FPMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
+	USkeletalMeshComponent* FullBody;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -61,11 +64,22 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
 
+private:
+	bool bHasRifle;
+	bool bHasPistol;
+	
 public:
 	/** Returns Mesh1P subobject **/
-	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+	USkeletalMeshComponent* GetMesh1P() const { return FPMesh; }
+	USkeletalMeshComponent* GetFullBody() const { return FullBody; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	bool GetHasRifle() const { return bHasRifle; }
+	bool GetHasPistol() const { return bHasPistol; }
+
+	// Change the name to Grab weapon and add a ENUM to identify the weapon class
+	void GrabRifle();
 
 };
 

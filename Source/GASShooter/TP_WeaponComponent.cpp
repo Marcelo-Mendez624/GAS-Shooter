@@ -71,15 +71,17 @@ bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 	Character = TargetCharacter;
 
 	// Check that the character is valid, and has no weapon component yet
-	if (Character == nullptr || Character->GetInstanceComponents().FindItemByClass<UTP_WeaponComponent>())
+	if (Character == nullptr || Character->GetHasRifle())
 	{
 		return false;
 	}
 
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-	AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
-
+	if(Character->IsLocallyControlled())
+		AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+	else
+		AttachToComponent(Character->GetFullBody(), AttachmentRules, FName(TEXT("GripPoint")));
 	// add the weapon as an instance component to the character
 	Character->AddInstanceComponent(this);
 
@@ -99,6 +101,8 @@ bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 		}
 	}
 
+	Character->GrabRifle();
+	
 	return true;
 }
 

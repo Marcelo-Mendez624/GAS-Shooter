@@ -28,13 +28,17 @@ AGASShooterCharacter::AGASShooterCharacter()
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
-	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
-	Mesh1P->SetOnlyOwnerSee(true);
-	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
-	Mesh1P->bCastDynamicShadow = false;
-	Mesh1P->CastShadow = false;
+	FPMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterFPMesh"));
+	FPMesh->SetOnlyOwnerSee(true);
+	FPMesh->SetupAttachment(FirstPersonCameraComponent);
+	FPMesh->bCastDynamicShadow = false;
+	FPMesh->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
-	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+	FPMesh->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+	// Third person mesh
+	FullBody = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FullBody"));
+	FullBody->SetupAttachment(GetCapsuleComponent());
 
 }
 
@@ -65,6 +69,11 @@ void AGASShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AGASShooterCharacter::GrabRifle()
+{
+	bHasRifle = true;
 }
 
 
