@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "GASShooterCharacter.generated.h"
 
+class UAbilitySystemComponent;
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -17,7 +19,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AGASShooterCharacter : public ACharacter
+class AGASShooterCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -46,6 +48,9 @@ public:
 protected:
 	virtual void BeginPlay();
 
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+
 public:
 		
 	/** Look Input Action */
@@ -59,14 +64,25 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	// ASC section
+	
+	UPROPERTY(VisibleAnywhere, Category = "ASC")
+	UAbilitySystemComponent* AbilitySystemComponent;
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
 
 private:
+	// Weapon section
 	bool bHasRifle;
 	bool bHasPistol;
+
+
+	// ASC section
+
+	void InitilizeASC();
 	
 public:
 	/** Returns Mesh1P subobject **/
@@ -80,6 +96,9 @@ public:
 
 	// Change the name to Grab weapon and add a ENUM to identify the weapon class
 	void GrabRifle();
+
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 };
 

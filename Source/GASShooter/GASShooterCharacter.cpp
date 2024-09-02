@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "Public/GAS/ShootAbilitySystemComponent.h"
+#include "Public/Player/ShootPlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -48,6 +50,20 @@ void AGASShooterCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AGASShooterCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	InitilizeASC();
+}
+
+void AGASShooterCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	InitilizeASC();
+}
+
 //////////////////////////////////////////////////////////////////////////// Input
 
 void AGASShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -71,9 +87,27 @@ void AGASShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	}
 }
 
+void AGASShooterCharacter::InitilizeASC()
+{
+	AShootPlayerState* PS = GetPlayerState<AShootPlayerState>();
+	if (PS)
+	{
+		// Set the ASC on the Server. Clients do this in OnRep_PlayerState()
+		AbilitySystemComponent = Cast<UShootAbilitySystemComponent>(PS->GetAbilitySystemComponent());
+
+		// AI won't have PlayerControllers so we can init again here just to be sure. No harm in initing twice for heroes that have PlayerControllers.
+		PS->GetAbilitySystemComponent()->InitAbilityActorInfo(PS, this);
+	}
+}
+
 void AGASShooterCharacter::GrabRifle()
 {
 	bHasRifle = true;
+}
+
+UAbilitySystemComponent* AGASShooterCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 
