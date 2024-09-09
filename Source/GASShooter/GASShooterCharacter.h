@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "ShootDataTypes.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "GASShooterCharacter.generated.h"
@@ -22,7 +23,8 @@ UCLASS(config=Game)
 class AGASShooterCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
-
+	
+	
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* FPMesh;
@@ -76,28 +78,28 @@ protected:
 
 private:
 	// Weapon section
-	bool bHasRifle;
+	bool bHasPrincipal;
 	bool bHasPistol;
-
-
-	// ASC section
-
-	void InitilizeASC();
+	// End weapon section
 	
+	void InitializeActorInfo();
+
 public:
 	/** Returns Mesh1P subobject **/
-	USkeletalMeshComponent* GetMesh1P() const { return FPMesh; }
+	USkeletalMeshComponent* GetFPMesh() const { return FPMesh; }
+	
+	/** Returns Fullbody subobject **/
 	USkeletalMeshComponent* GetFullBody() const { return FullBody; }
+	
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
-	bool GetHasRifle() const { return bHasRifle; }
+	bool GetHasPrincipal() const { return bHasPrincipal; }
 	bool GetHasPistol() const { return bHasPistol; }
 
 	// Change the name to Grab weapon and add a ENUM to identify the weapon class
-	void GrabRifle();
-
-
+	void GrabWeapon(EWeaponType WeaponType);
+	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 };
