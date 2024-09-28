@@ -1,8 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "TP_WeaponComponent.h"
-#include "GASShooterCharacter.h"
+#include "TP_WeaponActor.h"
+
+#include "AbilitySystemComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,18 +13,22 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+#include "GASShooter/GASShooterCharacter.h"
 
 // Sets default values for this component's properties
-UTP_WeaponComponent::UTP_WeaponComponent()
+AUtp_WeaponComponent::AUtp_WeaponComponent()
 {
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
-
 	ShootDistance = 5000;
+
+	bReplicates = true;
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 
-void UTP_WeaponComponent::Fire()
+void AUtp_WeaponComponent::Fire()
 {
 	if (Character == nullptr || Character->GetController() == nullptr)
 		return;
@@ -62,11 +67,15 @@ void UTP_WeaponComponent::Fire()
 	
 }
 
-void UTP_WeaponComponent::InspectWeapon()
+void AUtp_WeaponComponent::InspectWeapon()
 {
 }
 
-bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
+void AUtp_WeaponComponent::AddDefaultAbilities()
+{
+}
+
+bool AUtp_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 {
 	Character = TargetCharacter;
 
@@ -86,8 +95,8 @@ bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 		AttachToComponent(Character->GetFPMesh(), AttachmentRules, FName(TEXT("GripPoint")));
 	else
 		AttachToComponent(Character->GetFullBody(), AttachmentRules, FName(TEXT("GripPoint")));
-	// add the weapon as an instance component to the character
-	Character->AddInstanceComponent(this);
+
+	
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
@@ -101,11 +110,11 @@ bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AUtp_WeaponComponent::Fire);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AUtp_WeaponComponent::Fire);
 
 			// Inspect
-			EnhancedInputComponent->BindAction(InspectAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::InspectWeapon);
+			EnhancedInputComponent->BindAction(InspectAction, ETriggerEvent::Triggered, this, &AUtp_WeaponComponent::InspectWeapon);
 		}
 	}
 	
@@ -113,7 +122,7 @@ bool UTP_WeaponComponent::AttachWeapon(AGASShooterCharacter* TargetCharacter)
 	return true;
 }
 
-void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AUtp_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (Character == nullptr)
 		return;
@@ -122,4 +131,9 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 			Subsystem->RemoveMappingContext(FireMappingContext);
 
+}
+
+UAbilitySystemComponent* AUtp_WeaponComponent::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
